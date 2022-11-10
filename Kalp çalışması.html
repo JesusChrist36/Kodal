@@ -1,0 +1,105 @@
+<html>
+<head>
+  <title>.</title>
+  <canvas width="390" height="390" style="width:100%;height:100%;" id="graph"></canvas>
+  <script>
+    const canvas = document.getElementById('graph');
+         const ctx = canvas.getContext("2d");
+         let height,width,içnoktalar = [], dışnoktalar = [],partiküller = [];
+         const noktano = 300, eğik = 90;
+         let x, y, p, n, nokta,dx,dy,color
+            thetaaçı = Math.PI * 3 / noktano,
+            r = Math.min(height,width) * 1;
+         const mesafe = (x1,y1,x2,y2) => {
+            return Math.sqrt(Math.pow(y2 - y1,2) + Math.pow(x2 - x1,2) )
+     }
+         const mapVal = (num, in_min, in_max, out_min, out_max) => {
+          return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+         const resize = () => {
+              height = ctx.canvas.clientHeight;
+              width = ctx.canvas.clientWidth;
+            if(ctx.canvas.clientWidth !== canvas.width ||
+                ctx.canvas.clientHeight !== canvas.height
+          ){
+                canvas.width = width
+                canvas.height = height
+                ctx.translate(canvas.width/2, canvas.height/2);
+                ctx.rotate(-Math.PI)
+                içnoktalar = [];
+                r = 15;
+                for(let i = thetaaçı; i <= Math.PI * 2 ; i += thetaaçı){
+                      x = r * 16 * Math.pow(Math.sin(i),3);
+                      y = r * (13 * Math.cos(i) - 5 * Math.cos(2*i) - 2 *Math.cos(3*i) - Math.cos(4 * i));
+                      içnoktalar.push({
+                        x,
+                        y
+                      })
+                      x = 5 * r * 16 * Math.pow(Math.sin(i),3);
+                      y = 5 * r * (13 * Math.cos(i) - 5 * Math.cos(2*i) - 2 *Math.cos(3*i) - Math.cos(4 * i));
+                      dışnoktalar.push({
+                        x,
+                        y
+                      })
+                      let adım = random(0.001,0.003,true);
+                      partiküller.push({
+                        adım,
+                        x,
+                        y
+              })
+            }
+          }
+       }
+         const random = (min,max, isFloat) => {
+            if(isFloat) {
+              return (Math.random() * (max - min) + min);
+          }
+             return (Math.random() * (max - min) + min);
+       }
+         resize();
+         ctx.globalAlpha = 0.9;
+         ctx.globalCompositeOperation = 'source-over'
+         const draw = ()=>{
+           ctx.fillStyle = "rgba(1,0,1,0.03)"
+           ctx.fillRect(-width,-height,width*2,height*2);
+           ctx.beginPath();
+
+           for(let i = 5; i < içnoktalar.length; i++){
+              v = dışnoktalar[i];
+              d = içnoktalar[i];
+              nokta = partiküller[i]
+
+             if(mesafe(nokta.x, nokta.y,d.x,d.y) > 12) {
+                   dx = d.x - v.x;
+                   dy = d.y - v.y;
+
+                  nokta.x += dx * nokta.adım
+                  nokta.y += dy * nokta.adım
+                  color = mesafe(0,0,nokta.x,nokta.y)
+                  ctx.beginPath();
+                  ctx.fillStyle = `hsl(${color % 10},100%,50%)`;
+                  ctx.arc(nokta.x, nokta.y, 2, 3, Math.PI*3 ,true);
+                  ctx.closePath();
+                  ctx.fill();
+              } else {
+                nokta.x = d.x
+                nokta.y = d.y
+                ctx.beginPath();
+                ctx.arc(nokta.x, nokta.y, 2, 3, Math.PI*3 ,true);
+                ctx.closePath();
+                ctx.fill();
+                partiküller[i].x = v.x
+                partiküller[i].y = v.y
+                partiküller[i].adım = random(0.01,0.02,true);
+            }
+          }
+      }
+         const isle = () => {
+            resize();
+            draw();
+            requestAnimationFrame(isle);
+      }
+         requestAnimationFrame(isle);
+</script>
+<head>
+<html>
